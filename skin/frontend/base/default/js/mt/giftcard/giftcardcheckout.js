@@ -2,6 +2,8 @@ var GiftCardCheckout = {
 
     config: {},
 
+    isIWDCheckout: false,
+
     init: function(config)
     {
         GiftCardCheckout.config = config;
@@ -10,15 +12,15 @@ var GiftCardCheckout = {
 
     initPayment: function()
     {
+        GiftCardCheckout.setAsPaymentMethod(GiftCardCheckout.config.zeroTotal);
         GiftCardCheckout.initEvents();
         GiftCardCheckout.updateEvents();
         GiftCardCheckout.endLoading();
     },
 
-
     initEvents: function()
     {
-        jQuery('#p_method_giftcard').click(function(){
+        jQuery('#p_method_giftcard').unbind('click').click(function(){
             if (jQuery(this).is(':checked'))
                 jQuery('.gc-form-element').show();
             else {
@@ -48,9 +50,14 @@ var GiftCardCheckout = {
             var data = jQuery.parseJSON(response);
             if (data.content != '') {
                 jQuery('#checkout-payment-method-gift-card').html(data.content);
+                GiftCardCheckout.setAsPaymentMethod(data.zeroTotal);
             }
             GiftCardCheckout.updateEvents();
             GiftCardCheckout.endLoading();
+
+            if (GiftCardCheckout.isIWDCheckout){
+                IWD.OPC.Checkout.pullReview();
+            }
         });
     },
 
@@ -59,8 +66,14 @@ var GiftCardCheckout = {
         GiftCardCheckout.startLoading();
         jQuery.post(GiftCardCheckout.config.requestUrl+'addGiftCardCodeAjax', {
             giftcard_code: giftCardCode
-        }, function(){
+        }, function(response){
+            var data = jQuery.parseJSON(response);
+            GiftCardCheckout.setAsPaymentMethod(data.zeroTotal);
             GiftCardCheckout.endLoading();
+
+            if (GiftCardCheckout.isIWDCheckout){
+                IWD.OPC.Checkout.pullReview();
+            }
         });
     },
 
@@ -69,22 +82,34 @@ var GiftCardCheckout = {
         GiftCardCheckout.startLoading();
         jQuery.post(GiftCardCheckout.config.requestUrl+'removeGiftCardCodeAjax', {
             giftcard_code: giftCardCode
-        }, function(){
+        }, function(response){
+            var data = jQuery.parseJSON(response);
+            GiftCardCheckout.setAsPaymentMethod(data.zeroTotal);
             GiftCardCheckout.endLoading();
+
+            if (GiftCardCheckout.isIWDCheckout){
+                IWD.OPC.Checkout.pullReview();
+            }
         });
     },
 
     clearGiftCardCode :function()
     {
         GiftCardCheckout.startLoading();
-        jQuery.post(GiftCardCheckout.config.requestUrl+'clearGiftCardCodeAjax', {}, function(){
+        jQuery.post(GiftCardCheckout.config.requestUrl+'clearGiftCardCodeAjax', {}, function(response){
+            var data = jQuery.parseJSON(response);
+            GiftCardCheckout.setAsPaymentMethod(data.zeroTotal);
             GiftCardCheckout.endLoading();
+
+            if (GiftCardCheckout.isIWDCheckout){
+                IWD.OPC.Checkout.pullReview();
+            }
         });
     },
 
     updateEvents :function()
     {
-        jQuery('input[name="apply_gift_card[]"]').click(function(){
+        jQuery('input[name="apply_gift_card[]"]').unbind('click').click(function(){
             if (jQuery(this).is(':checked')) {
                 GiftCardCheckout.addGiftCardCode(jQuery(this).val());
             } else {
@@ -114,6 +139,34 @@ var GiftCardCheckout = {
     hidePaymentMethod: function()
     {
         jQuery('#p_method_giftcard').parent().remove();
+    },
+
+    setAsPaymentMethod: function(condition)
+    {
+        if (condition == true) {
+            setTimeout(function(){
+                jQuery('#p_method_giftcard_hidden').trigger('click');
+            }, 500);
+
+        } else {
+            jQuery('#p_method_giftcard_hidden').removeAttr('checked');
+        }
+    },
+
+    iwdCheckoutKeyupFilter: function(event)
+    {
+        if (event.target.id == 'gift_card_code') {
+            return false;
+        }
+        return true;
+    },
+
+    iwdCheckoutEvents: function()
+    {
+        if (!GiftCardCheckout.isIWDCheckout) {
+            GiftCardCheckout.isIWDCheckout = true;
+        }
+
     }
 };
 

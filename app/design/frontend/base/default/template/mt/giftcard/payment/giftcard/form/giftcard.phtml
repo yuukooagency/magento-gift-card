@@ -36,7 +36,6 @@
                                         <button type="button" title="<?php echo $this->__('Apply Gift Card') ?>" class="button" onclick="GiftCardCheckout.addGiftCardCodeSubmit()"><span><span><?php echo $this->__('Apply Gift Card') ?></span></span></button>
                                     </div>
                                     <div id="gc-please-wait" class="please-wait">
-                                        <img class="v-middle" title="Loading next step..." alt="Loading next step..." src="<?php echo $this->getSkinUrl('images/mt/giftcard/opc-ajax-loader.gif') ?>">
                                         <?php echo $this->__('Please wait...'); ?>
                                     </div>
                                     <?php if ($error = $this->getError()): ?>

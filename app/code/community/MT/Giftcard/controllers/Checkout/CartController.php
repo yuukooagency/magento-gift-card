@@ -14,6 +14,7 @@ class MT_Giftcard_Checkout_CartController
 
             if ($giftCardQuote->removeAllGiftCardFromQuote($quoteId)) {
                 $success = $this->__('Gift cards was removed.');
+                $this->_collectTotals();
             }
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -27,7 +28,8 @@ class MT_Giftcard_Checkout_CartController
         ))->renderView();
 
         $this->getResponse()->setBody(json_encode(array(
-            'content' => $content
+            'content' => $content,
+            'zeroTotal' => 'false'
         )));
     }
 
@@ -43,6 +45,7 @@ class MT_Giftcard_Checkout_CartController
                 $giftCardQuote = Mage::getModel('giftcard/quote');
                 if ($giftCardQuote->removeGiftCardByCode($quoteId, $giftCardCode)) {
                     $success = $this->__('Gift cards was removed.');
+                    $this->_collectTotals();
                 }
             } catch (Mage_Core_Exception $e) {
                 $error = $e->getMessage();
@@ -57,7 +60,8 @@ class MT_Giftcard_Checkout_CartController
         ))->renderView();
 
         $this->getResponse()->setBody(json_encode(array(
-            'content' => $content
+            'content' => $content,
+            'zeroTotal' => Mage::getModel('giftcard/quote')->zeroTotal()
         )));
     }
 
@@ -73,6 +77,8 @@ class MT_Giftcard_Checkout_CartController
                 $giftCardQuote = Mage::getModel('giftcard/quote');
                 if (!$giftCardQuote->addGiftCardByCode($quoteId, $giftCardCode)) {
                     $error = $this->__('Gift card "%s" is not valid.', Mage::helper('core')->escapeHtml($giftCardCode));
+                } else {
+                    $this->_collectTotals();
                 }
             } catch (Mage_Core_Exception $e) {
                 $error = $e->getMessage();
@@ -87,8 +93,10 @@ class MT_Giftcard_Checkout_CartController
             'success' => $success,
         ))->renderView();
 
+
         $this->getResponse()->setBody(json_encode(array(
-            'content' => $content
+            'content' => $content,
+            'zeroTotal' => Mage::getModel('giftcard/quote')->zeroTotal()
         )));
     }
 
@@ -118,7 +126,8 @@ class MT_Giftcard_Checkout_CartController
         ))->renderView();
 
         $this->getResponse()->setBody(json_encode(array(
-            'content' => $response
+            'content' => $response,
+            'zeroTotal' => Mage::getModel('giftcard/quote')->zeroTotal()
         )));
     }
 
@@ -140,6 +149,8 @@ class MT_Giftcard_Checkout_CartController
             $quoteId = $this->_getQuote()->getId();
             $giftCardQuote = Mage::getModel('giftcard/quote');
             if ($giftCardQuote->addGiftCardByCode($quoteId, $giftCardCode)) {
+                $this->_getQuote()->getShippingAddress()->setCollectShippingRates(true);
+                $this->_getQuote()->collectTotals()->save();
                 $this->_getSession()->addSuccess(
                     $this->__('Gift card "%s" was applied.', Mage::helper('core')->escapeHtml($giftCardCode))
                 );
@@ -150,7 +161,7 @@ class MT_Giftcard_Checkout_CartController
             }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
-        } catch (Exception $e) { print_r($e);
+        } catch (Exception $e) {
             $this->_getSession()->addError($this->__('Error! Please contact with administrator'));
             Mage::logException($e);
         }
@@ -171,6 +182,8 @@ class MT_Giftcard_Checkout_CartController
         try {
             $quoteId = $this->_getQuote()->getId();
             Mage::getModel('giftcard/quote')->removeGiftCardArrayFromQuote($quoteId, $removeCodes);
+            $this->_getQuote()->getShippingAddress()->setCollectShippingRates(true);
+            $this->_getQuote()->collectTotals()->save();
             $this->_getSession()->addSuccess(
                 $this->__('Gift cards was removed.')
             );
@@ -221,5 +234,12 @@ class MT_Giftcard_Checkout_CartController
             $this->_redirect('checkout/cart');
         }
         return $this;
+    }
+
+    protected function _collectTotals()
+    {
+        Mage::getSingleton('checkout/cart')->getQuote()
+            ->collectTotals()
+            ->save();
     }
 }

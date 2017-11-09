@@ -23,8 +23,7 @@ class MT_Giftcard_Model_Quote extends Mage_Core_Model_Abstract
             return false;
         }
 
-        $giftCard = Mage::getModel('giftcard/giftcard');
-        $giftCard->loadByCode($giftCardCode);
+        $giftCard = Mage::getModel('giftcard/giftcard')->loadByCode($giftCardCode);
         if (!$giftCard->getId() || !$giftCard->isSold()) {
             $this->setError($helper->__('Bad gift card code.'));
             return false;
@@ -149,6 +148,38 @@ class MT_Giftcard_Model_Quote extends Mage_Core_Model_Abstract
         }
 
         return $this->__giftCardCollection[$quoteId];
+    }
+
+    public function getTotalBalance($quote = null, $currency = null)
+    {
+        if ($quote == null) {
+            $quote = Mage::getModel('checkout/session')->getQuote();
+        }
+
+        $giftCardCollection = $this->getGiftCardCollection($quote->getId());
+
+        if($giftCardCollection->count() == 0) {
+            return 0;
+        }
+        $total = 0;
+        if ($currency == null) {
+            $currency = Mage::app()->getStore()->getCurrentCurrencyCode();
+        }
+        foreach ($giftCardCollection as $giftCard) {
+            $total+=$giftCard->getBalance($currency);
+        }
+        return $total;
+    }
+
+    public function zeroTotal()
+    {
+        $discount = Mage::getModel('giftcard/quote')->getTotalBalance();
+        $total = Mage::getModel('checkout/session')->getQuote()->getData('subtotal_with_discount');
+        if ($total - $discount <= 0){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function calculateDiscount(Mage_Sales_Model_Quote_Address $address, $currencyCode)
