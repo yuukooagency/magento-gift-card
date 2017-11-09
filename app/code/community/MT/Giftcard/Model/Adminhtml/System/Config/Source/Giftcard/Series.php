@@ -47,7 +47,6 @@ class MT_Giftcard_Model_Adminhtml_System_Config_Source_Giftcard_Series extends M
 
     public function toOptionArray()
     {
-        exit('b');
         return $this->getAllOptions();
     }
 

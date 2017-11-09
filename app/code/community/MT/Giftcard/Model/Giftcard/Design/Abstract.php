@@ -129,15 +129,10 @@ abstract class MT_Giftcard_Model_Giftcard_Design_Abstract
     public function saveToFile()
     {
         ob_start();
-        imagejpeg($this->getImg(), NULL, 100);
+        imagejpeg($this->getImg(), null, 100);
         $image = ob_get_contents();
         ob_end_clean();
         $image = substr_replace($image, pack("Cnn", 0x01, 300, 300), 13, 5);
-        file_put_contents('var/mt/jpg/aaa.jpg', $image);
-
-        header('Content-type:image/jpg');
-        echo $image;
-        exit;
     }
 
     public function getImageSource()

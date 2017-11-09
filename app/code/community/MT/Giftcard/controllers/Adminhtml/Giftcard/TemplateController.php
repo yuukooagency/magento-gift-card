@@ -247,6 +247,7 @@ class MT_Giftcard_Adminhtml_Giftcard_TemplateController extends Mage_Adminhtml_C
             $template->load($params['template_id']);
         if (isset($params['background']))
             unset($params['background']);
+
         if (count($params) != 0) {
             $designName = $params['design'];
             $design = Mage::getModel('giftcard/giftcard_design_'.$designName);
@@ -257,16 +258,25 @@ class MT_Giftcard_Adminhtml_Giftcard_TemplateController extends Mage_Adminhtml_C
                 else
                     $template->setData($field[2]['index'], '');
             }
-
             $template->setDesign($design);
         }
+
         $design->setGiftCard($giftCard);
         $design->setTemplate($template);
         $design->draw();
 
-        //TODO change this
-        header('Content-type:image/jpg');
-        echo $design->getImageSource();
-        exit;
+        $content = $design->getImageSource();
+        $this->getResponse()
+            ->setHttpResponseCode(200)
+            ->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)
+            ->setHeader('Content-Length', strlen($content), true)
+            ->setHeader('Content-type', 'image/jpg', true);
+
+        $this->getResponse()->setBody($content);
+    }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('giftcard/template');
     }
 }

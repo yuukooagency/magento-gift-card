@@ -172,4 +172,9 @@ class MT_Giftcard_Adminhtml_Giftcard_SeriesController extends Mage_Adminhtml_Con
 
         $this->getResponse()->setBody($this->getLayout()->createBlock('giftcard/adminhtml_giftcard_series_edit_tabs_generate_grid')->toHtml());
     }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('giftcard/series');
+    }
 }

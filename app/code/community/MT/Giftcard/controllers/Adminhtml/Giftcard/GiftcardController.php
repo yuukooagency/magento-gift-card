@@ -195,10 +195,11 @@ class MT_Giftcard_Adminhtml_Giftcard_GiftcardController extends Mage_Adminhtml_C
         }
 
         if (!empty($comeFrom)){
-            echo base64_decode($comeFrom);exit;
             $this->_redirect(base64_decode($comeFrom));
+        } else {
+            $this->_redirect('*/*/');
         }
-        $this->_redirect('*/*/');
+
     }
 
     public function massExportAction()
@@ -329,7 +330,6 @@ class MT_Giftcard_Adminhtml_Giftcard_GiftcardController extends Mage_Adminhtml_C
                     $filePath = $pdf->getPdfPath();
                     $fileName = Mage::helper('giftcard')->__('gift_card').'_'.$giftCard->getId().'.pdf';
                 }
-
             } elseif ($params['format'] == 'jpg') {
                 $draw = Mage::getModel('giftcard/giftcard_draw');
                 $draw->setGiftCard($giftCard);
@@ -339,22 +339,14 @@ class MT_Giftcard_Adminhtml_Giftcard_GiftcardController extends Mage_Adminhtml_C
                 $fileName = Mage::helper('giftcard')->__('gift_card').'_'.$giftCard->getId().'.jpg';
             }
 
-            if ($filePath != '' && $fileName != '') {
-                $this->getResponse()
-                    ->setHttpResponseCode(200)
-                    ->setHeader('Pragma', 'public', true)
-                    ->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)
-                    ->setHeader('Content-type', 'application/octet-stream', true)
-                    ->setHeader('Content-Length', filesize($filePath), true)
-                    ->setHeader('Content-Disposition', 'attachment; filename="'.$fileName.'"', true)
-                    ->setHeader('Last-Modified', date('r'), true);
-                $this->getResponse()->clearBody();
-                $this->getResponse()->sendHeaders();
-                echo file_get_contents($filePath);
-                unlink($filePath);
-                exit(0);
-            }
-
+            return $this->_prepareDownloadResponse(
+                $fileName,
+                array(
+                    'type' => 'filename',
+                    'value' => $filePath,
+                    'rm' => 1
+                )
+            );
         } catch (Mage_Core_Model_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Mage_Core_Exception $e) {
@@ -362,6 +354,7 @@ class MT_Giftcard_Adminhtml_Giftcard_GiftcardController extends Mage_Adminhtml_C
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         }
+
         $this->_redirect('*/*/edit/', array('id' => $params['id']));
     }
 
@@ -389,5 +382,10 @@ class MT_Giftcard_Adminhtml_Giftcard_GiftcardController extends Mage_Adminhtml_C
             $this->_redirect(base64_decode($comeFrom));
         else
             $this->_redirect('*/*/');
+    }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('giftcard/giftcard');
     }
 }
