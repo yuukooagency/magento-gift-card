@@ -109,4 +109,9 @@ class MT_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             Mage::app()->getStore()->getCurrentCurrencyCode()
         );
     }
+
+    public function getExtensionVersion()
+    {
+        return (string) Mage::getConfig()->getNode()->modules->MT_Giftcard->version;
+    }
 }
