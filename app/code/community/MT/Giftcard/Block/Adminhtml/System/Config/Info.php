@@ -42,7 +42,7 @@ class MT_Giftcard_Block_Adminhtml_System_Config_Info
             'compare' => 'http://www.magetrend.com/gift-card-free/?utm_source=m1gcf#compare',
             'paid_name' => 'Gift Card PRO',
             'paid_link' => 'http://www.magetrend.com/gift-card/?utm_source=m1gcf',
-            'paid_img' => 'http://www.magetrend.com/media/images/info/magento-gift-card.jpg',
+            'paid_img' => 'http://www.magetrend.com/media/images/info/magento-gift-card.png',
             'features' => array(
                 '2 x Gift Card Designs',
                 'Plastic/Paper Gift Card Type',
