@@ -1,0 +1,24 @@
+{
+    "name": "magento-gift-cardl",
+    "type": "magento-module",
+    "license": "OSL-3.0",
+    "description": "Free Gift Card extension for Magento",
+    "license": [
+        "Commercial"
+    ],
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Magetrend",
+            "email": "support@magetrend.com"
+        }
+    ],
+    "extra": {
+        "map" : [
+            ["app","app"],
+            ["lib","lib"],
+            ["js","js"],
+            ["skin","skin"]
+        ]
+    }
+}
