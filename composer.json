@@ -3,9 +3,6 @@
     "type": "magento-module",
     "license": "OSL-3.0",
     "description": "Free Gift Card extension for Magento",
-    "license": [
-        "Commercial"
-    ],
     "minimum-stability": "dev",
     "authors": [
         {
